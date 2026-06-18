@@ -1,33 +1,32 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const mongoUri = process.env.MONGO_URI;
 
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  credentials: true
+}));
 app.use(express.json());
 
-let db;
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Connect to MongoDB
-if (mongoUri) {
-  MongoClient.connect(mongoUri)
-    .then(client => {
-      console.log('Connected to MongoDB');
-      db = client.db(); // Can pass db name here if needed
-    })
-    .catch(error => console.error('Failed to connect to MongoDB:', error));
-} else {
-  console.warn('No MONGO_URI provided in .env');
-}
+// Routes
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/students', require('./routes/student.routes'));
+app.use('/api/exams', require('./routes/exam.routes'));
+app.use('/api/results', require('./routes/result.routes'));
 
-app.get('/', (req, res) => {
-  res.send('Backend is running!');
-});
+app.get('/', (req, res) => res.json({ status: 'Softrate HirePro API running 🚀' }));
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`🚀 Server running on http://localhost:${port}`);
 });
