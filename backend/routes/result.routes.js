@@ -17,9 +17,65 @@ router.post('/submit', protect, async (req, res) => {
     const exam = await Exam.findById(examId);
     if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
-    // Auto-grade MCQ answers
+    const { GoogleGenAI } = require('@google/genai');
+
+    async function evaluateWrittenAnswer(questionText, rubric, studentAnswer, maxMarks) {
+      if (!studentAnswer || !studentAnswer.trim()) {
+        return { marksEarned: 0, feedback: "No answer provided." };
+      }
+
+      const keys = [
+        process.env.GEMINI_KEY_1,
+        process.env.GEMINI_KEY_2,
+        process.env.GEMINI_KEY_3
+      ].filter(k => !!k);
+
+      if (keys.length === 0) {
+        return { marksEarned: 0, feedback: "Auto-grading unavailable (no API key configured)." };
+      }
+
+      const promptText = `
+        You are an expert examiner grading a student's written response.
+        Question Scenario: "${questionText}"
+        Maximum Possible Marks: ${maxMarks}
+        Student Answer: "${studentAnswer}"
+        
+        Evaluation Rubric (Criterion: Max Points):
+        ${rubric.map(r => `- ${r.criterion}: ${r.marks}`).join('\n')}
+        
+        Evaluate the student's answer strictly based on the rubric. Calculate the score by summing the points earned for each criterion, ensuring the final score is an integer between 0 and ${maxMarks}.
+        Return ONLY a raw JSON object (no markdown, no backticks) with the following exact structure:
+        {
+          "marksEarned": <integer between 0 and ${maxMarks}>
+        }
+      `;
+
+      let lastError;
+      for (const key of keys) {
+        try {
+          const ai = new GoogleGenAI({ apiKey: key });
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: promptText,
+          });
+          
+          let jsonText = response.text.trim();
+          if (jsonText.startsWith('```json')) jsonText = jsonText.slice(7, -3).trim();
+          if (jsonText.startsWith('```')) jsonText = jsonText.slice(3, -3).trim();
+          
+          return JSON.parse(jsonText);
+        } catch (err) {
+          console.warn(`Gemini API call failed with key ending in ${key.substring(key.length - 4)}: ${err.message}. Trying next...`);
+          lastError = err;
+        }
+      }
+      console.error("All Gemini API keys failed:", lastError);
+      return { marksEarned: 0, feedback: "Auto-grading failed due to AI service error." };
+    }
+
+    // Auto-grade MCQ and Written answers
     let totalScore = 0;
-    const gradedAnswers = answers.map((ans) => {
+    const gradedAnswers = await Promise.all(answers.map(async (ans) => {
       const section = exam.sections[ans.sectionIndex];
       if (!section) return { ...ans, isCorrect: false, marksEarned: 0 };
 
@@ -39,17 +95,21 @@ router.post('/submit', protect, async (req, res) => {
           marksEarned
         };
       } else {
-        // Written — no auto-grade, 0 by default (admin can update later)
+        // Written — auto-grade using Gemini API
+        const evaluation = await evaluateWrittenAnswer(question.text, question.rubric, ans.answer, question.marks);
+        totalScore += (evaluation.marksEarned || 0);
+        
         return {
           questionId: question._id,
           sectionIndex: ans.sectionIndex,
           questionIndex: ans.questionIndex,
           answer: ans.answer,
           isCorrect: null,
-          marksEarned: 0
+          marksEarned: evaluation.marksEarned || 0,
+          aiFeedback: evaluation.feedback
         };
       }
-    });
+    }));
 
     const result = await Result.create({
       examId,

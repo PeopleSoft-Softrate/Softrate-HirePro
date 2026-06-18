@@ -39,6 +39,8 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 64px;
+  margin: 3rem;
+  border-radius: 3rem;
 }
 
 @media (min-width: 1024px) {

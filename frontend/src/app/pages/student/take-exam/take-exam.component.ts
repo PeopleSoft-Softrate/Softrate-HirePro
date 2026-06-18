@@ -22,6 +22,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
   submitResult: any = null;
   error = '';
   showExitConfirm = false;
+  showFinalSubmitConfirm = false;
 
   @HostListener('window:popstate', ['$event'])
   onPopState(event: any) {
@@ -80,14 +81,25 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     this.examService.getExam(id).subscribe({
       next: (exam) => {
         this.exam = exam;
-        // Initialize answers grid
+        
+        // Add _originalIndex and shuffle questions & options
+        this.exam.sections.forEach((sec: any) => {
+          sec.questions.forEach((q: any, qIdx: number) => {
+            q._originalIndex = qIdx;
+            if (q.options && q.options.length > 0) {
+              this.shuffleArray(q.options);
+            }
+          });
+          this.shuffleArray(sec.questions);
+        });
+
+        // Initialize answers grid based on shuffled length
         this.answers = exam.sections.map((s: any) => s.questions.map(() => ''));
         // Set timers (but don't start yet — wait for user to click Start)
         this.globalTimerSecs = (exam.totalDuration || 0) * 60;
         this.setSectionTimer();
         this.loading = false;
         this.examReady = true;
-        // DO NOT auto-fullscreen here — needs a real user gesture
       },
       error: () => { this.error = 'Failed to load exam.'; this.loading = false; }
     });
@@ -150,6 +162,14 @@ export class TakeExamComponent implements OnInit, OnDestroy {
       document.exitFullscreen().catch(() => {});
     }
     this.isFullscreen = false;
+  }
+
+  // Fisher-Yates shuffle
+  shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
 
   // Called by the "Start Exam" button — real user click provides the gesture
@@ -319,7 +339,15 @@ export class TakeExamComponent implements OnInit, OnDestroy {
 
   // ---- Submit ----
   confirmSubmit() {
-    if (!confirm('Are you sure you want to submit the exam? This action cannot be undone.')) return;
+    this.showFinalSubmitConfirm = true;
+  }
+
+  cancelFinalSubmit() {
+    this.showFinalSubmitConfirm = false;
+  }
+
+  executeFinalSubmit() {
+    this.showFinalSubmitConfirm = false;
     this.submit();
   }
 
@@ -335,7 +363,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
         flatAnswers.push({
           questionId: q._id,
           sectionIndex: sIdx,
-          questionIndex: qIdx,
+          questionIndex: q._originalIndex !== undefined ? q._originalIndex : qIdx,
           answer: this.answers[sIdx]?.[qIdx] || ''
         });
       });
