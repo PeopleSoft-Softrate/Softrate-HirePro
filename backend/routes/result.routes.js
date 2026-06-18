@@ -7,7 +7,7 @@ const { protect, adminOnly } = require('../middleware/auth');
 // POST /api/results/submit  (student)
 router.post('/submit', protect, async (req, res) => {
   try {
-    const { examId, answers, timeTakenSeconds } = req.body;
+    const { examId, answers, timeTakenSeconds, screenChanges, autoSubmitted } = req.body;
 
     // Check if already submitted
     const existing = await Result.findOne({ examId, studentId: req.user._id });
@@ -58,9 +58,10 @@ router.post('/submit', protect, async (req, res) => {
       totalScore,
       totalMarks: exam.totalMarks,
       timeTakenSeconds,
+      screenChanges: screenChanges || 0,
+      autoSubmitted: autoSubmitted || false,
       submittedAt: new Date()
     });
-
     res.status(201).json({
       message: 'Exam submitted successfully',
       resultId: result._id,

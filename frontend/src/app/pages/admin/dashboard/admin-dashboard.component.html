@@ -1,99 +1,246 @@
-<div class="page-wrap">
-  <div class="page-head">
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome back, {{ auth.currentUser?.name }}</p>
-    </div>
-    <a routerLink="/admin/exams/create" class="btn-primary-action">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Create Exam
-    </a>
-  </div>
-
-  <!-- Stats -->
-  <div class="stats-grid" *ngIf="!loading">
-    <div class="stat-card">
-      <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-      <div class="stat-info">
-        <div class="stat-num">{{ exams.length }}</div>
-        <div class="stat-label">Total Exams</div>
+<div class="dash-container">
+  <!-- Header & Top Action Bar -->
+  <header class="dash-header">
+    <div class="header-left">
+      <div class="header-line"></div>
+      <div>
+        <h2 class="header-title">Analytics Command</h2>
+        <p class="header-date">{{ currentDate }}</p>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div class="stat-info">
-        <div class="stat-num">{{ activeExams }}</div>
-        <div class="stat-label">Active Exams</div>
-      </div>
+    <div class="header-right">
+      <button class="icon-btn" title="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn relative" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <div class="stat-info">
-        <div class="stat-num">{{ students.length }}</div>
-        <div class="stat-label">Students</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-      <div class="stat-info">
-        <div class="stat-num">{{ totalSubmissions }}</div>
-        <div class="stat-label">Submissions</div>
-      </div>
-    </div>
-  </div>
+  </header>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="loading">
-    <div class="spinner"></div>
-    <p>Loading dashboard...</p>
-  </div>
-
-  <!-- Recent Results Table -->
-  <div class="section" *ngIf="!loading">
-    <div class="section-head">
-      <h2>Recent Submissions</h2>
-      <a routerLink="/admin/results" class="view-all">View All →</a>
-    </div>
-
-    <div class="requests-table-wrapper" *ngIf="recentResults.length > 0">
-      <table class="requests-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Student</th>
-            <th>Exam</th>
-            <th>Score</th>
-            <th>Time Taken</th>
-            <th>Submitted At</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let r of recentResults; let i = index">
-            <td class="td-num">{{ i + 1 }}</td>
-            <td>
-              <div class="tbl-person">
-                <div class="tbl-avatar onboarding">{{ (r.studentId?.name || 'U')[0] }}</div>
-                <div>
-                  <div class="tbl-name">{{ r.studentId?.name }}</div>
-                  <div class="tbl-role">{{ r.studentId?.email }}</div>
-                </div>
+  <!-- Hero Analytics Layout -->
+  <div class="hero-grid">
+    <!-- Big Focus Metric -->
+    <div class="hero-card primary-card glass">
+      <div class="card-content-z flex-col-h">
+        <div class="card-head">
+          <div>
+            <h3 class="label-tracking text-primary">Global Performance Index</h3>
+            <p class="headline-bold">Engagement Overview</p>
+          </div>
+          <div class="chip-live">LIVE</div>
+        </div>
+        <!-- Dynamic Multi-Line Visualization -->
+        <div class="chart-wrapper">
+          <svg class="chart-svg" viewBox="0 0 800 150">
+            <!-- Dynamic Chart Line -->
+            <path class="chart-pulse" [attr.d]="lineChartPath" fill="none" stroke="var(--accent-primary)" stroke-linecap="round" stroke-width="4"></path>
+            <!-- Faint Line -->
+            <path d="M0,140 Q100,80 200,120 T400,90 T600,140 T800,80" fill="none" stroke="var(--accent-primary)" stroke-dasharray="10 10" stroke-opacity="0.1" stroke-width="2"></path>
+          </svg>
+          <div class="chart-floating-stat glass-dark">
+            <div class="flex-center-gap mb-1">
+              <div class="icon-box-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
               </div>
-            </td>
-            <td class="tbl-text">{{ r.examId?.title }}</td>
-            <td>
-              <span class="score-badge" [class]="getScoreClass(r)">
-                {{ r.totalScore }}/{{ r.totalMarks }} ({{ getPercent(r) }}%)
-              </span>
-            </td>
-            <td class="tbl-text">{{ formatTime(r.timeTakenSeconds) }}</td>
-            <td class="tbl-date">{{ r.submittedAt | date:'dd MMM, HH:mm' }}</td>
-          </tr>
-        </tbody>
-      </table>
+              <span class="stat-big-num">{{ totalSubmissions }}</span>
+            </div>
+            <p class="label-tracking">Candidate Impressions</p>
+          </div>
+        </div>
+      </div>
+      <!-- Background Decorative Elements -->
+      <div class="deco-blob bottom-right"></div>
     </div>
 
-    <div class="empty-state" *ngIf="recentResults.length === 0">
-      <p>No submissions yet</p>
+    <!-- Secondary High-Value Card (Stage Performance swapped) -->
+    <div class="hero-card glass radar-card">
+      <h3 class="label-tracking text-outline mb-6">Stage Performance</h3>
+      <div class="radar-wrapper">
+        <div class="radar-circle c-1">
+          <div class="radar-circle c-2">
+            <div class="radar-circle c-3"></div>
+          </div>
+        </div>
+        <div class="radar-polygon">
+          <svg class="drop-shadow" height="120" viewBox="0 0 100 100" width="120">
+            <polygon fill="rgba(71, 143, 229, 0.2)" [attr.points]="radarPoints" stroke="var(--accent-primary)" stroke-width="2"></polygon>
+          </svg>
+        </div>
+        <div class="radar-label top">STAGE 1</div>
+        <div class="radar-label bottom">STAGE 3</div>
+        <div class="radar-label left">STAGE 4</div>
+        <div class="radar-label right">STAGE 2</div>
+      </div>
     </div>
   </div>
+
+  <!-- Triple Metric Pulse -->
+  <div class="triple-grid mb-12">
+    <div class="metric-card">
+      <div class="metric-icon-box text-primary">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <div class="metric-num">{{ activeExams }}</div>
+        <div class="metric-label">Total Active Exams</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-box text-secondary">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="metric-num">{{ students.length }}</div>
+        <div class="metric-label">Registered Candidates</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon-box text-tertiary">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div>
+        <div class="metric-num">98.2%</div>
+        <div class="metric-label">Server Uptime</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Split -->
+  <div class="split-grid">
+    <!-- Left Column -->
+    <div class="split-left">
+      <div class="glass pulse-card">
+        <div class="pulse-head">
+          <h3 class="font-bold">Performance Pulse</h3>
+          <div class="pulse-dot"></div>
+        </div>
+        <div class="pulse-list" *ngIf="recentResults.length > 0">
+          <div class="pulse-item" *ngFor="let r of recentResults.slice(0, 3)">
+            <div class="pulse-line"></div>
+            <div>
+              <p class="pulse-text">Candidate <span class="font-bold">{{ r.studentId?.name || 'Unknown' }}</span> just submitted "<span class="font-bold">{{ r.examId?.title || 'Exam' }}</span>".</p>
+              <span class="pulse-meta">Live Activity • {{ r.submittedAt | date:'shortTime' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pulse-list" *ngIf="recentResults.length === 0">
+          <p class="text-muted text-sm">No recent activity.</p>
+        </div>
+      </div>
+
+      <!-- Talent Density Radar (Quality Score swapped) -->
+      <div class="glass hero-card dark-card shadow-lg" style="flex: 1;">
+        <div>
+          <h3 class="label-tracking dimmed mb-4">Quality Score</h3>
+          <div class="flex-center-gap">
+            <div class="huge-num">{{ avgScore }}<span class="percent-sign">%</span></div>
+            <div class="chip-success">+12%</div>
+          </div>
+        </div>
+        <p class="dimmed-text mt-auto mb-4">System-wide success rate is actively monitored. Talent quality is peak.</p>
+        <div class="dark-card-footer">
+          <div>
+            <div class="font-bold text-lg">{{ exams.length }}</div>
+            <div class="label-tracking dimmed-heavy">Total Exams</div>
+          </div>
+          <div>
+            <div class="font-bold text-lg">{{ activeExams }}</div>
+            <div class="label-tracking dimmed-heavy">Active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Recent Submissions -->
+    <div class="split-right">
+      <div class="glass submissions-card">
+        <div class="sub-head">
+          <div>
+            <h3 class="font-bold text-xl">Active Submissions</h3>
+            <p class="text-muted text-sm mt-1">Reviewing candidates for active tracks</p>
+          </div>
+          <a routerLink="/admin/results" class="link-primary flex-center-gap">
+            Explore Full Repository
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+        
+        <div class="sub-content">
+          <div class="requests-table-wrapper" *ngIf="recentResults.length > 0">
+            <table class="requests-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Exam</th>
+                  <th>Score</th>
+                  <th>Malpractice Count</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of recentResults; let i = index">
+                  <td>
+                    <div class="tbl-person">
+                      <div class="tbl-avatar onboarding">{{ (r.studentId?.name || 'U')[0] }}</div>
+                      <div>
+                        <div class="tbl-name">{{ r.studentId?.name }}</div>
+                        <div class="tbl-role">{{ r.studentId?.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="exam-title-truncate" [title]="r.examId?.title">
+                      {{ r.examId?.title }}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="score-badge" [class]="getScoreClass(r)">
+                      {{ r.totalScore }}/{{ r.totalMarks }}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="font-size:0.85rem;" [style.color]="(r.screenChanges || 0) > 0 ? '#ef4444' : 'inherit'">
+                      {{ r.screenChanges || 0 }}
+                    </div>
+                  </td>
+                  <td class="tbl-text">{{ formatTime(r.timeTakenSeconds) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state-box" *ngIf="recentResults.length === 0">
+            <div class="empty-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <h4 class="font-bold text-lg mb-2">Initialize Exam to See Data</h4>
+            <p class="text-muted text-sm mb-6 max-w-sm mx-auto">Start receiving professional submissions by inviting your candidates to the active assessment tracks.</p>
+          </div>
+        </div>
+
+        <div class="sub-footer">
+          <span class="label-tracking text-muted">Showing {{ recentResults.length }} Entries</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <footer class="dash-footer">
+    <div class="flex-center-gap">
+      <div class="flex-center-gap gap-2">
+        <span class="status-dot"></span>
+        <span class="text-xs font-bold text-muted">Core Engine 4.0 Online</span>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="#">Documentation</a>
+      <a href="#">API Keys</a>
+      <a href="#">Security Audit</a>
+      <div class="divider"></div>
+      <span class="text-xs text-muted">© {{ currentDate | date:'yyyy' }} Hire Pro</span>
+    </div>
+  </footer>
 </div>

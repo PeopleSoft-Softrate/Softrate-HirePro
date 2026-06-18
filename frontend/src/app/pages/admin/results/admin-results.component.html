@@ -17,25 +17,25 @@
   </div>
 
   <div class="loading-state" *ngIf="loading">
-    <div class="spinner"></div><p>Loading results...</p>
+    <div class="spinner"></div>
+    <p>Loading results...</p>
   </div>
 
   <div class="requests-table-wrapper" *ngIf="!loading && filteredResults.length > 0">
     <table class="requests-table">
       <thead>
         <tr>
-          <th>#</th>
           <th>Student</th>
           <th>College</th>
           <th>Exam</th>
           <th>Score</th>
           <th>Time Taken</th>
+          <th>Malpractice Count</th>
           <th>Submitted At</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let r of filteredResults; let i = index">
-          <td class="td-num">{{ i + 1 }}</td>
           <td>
             <div class="tbl-person">
               <div class="tbl-avatar onboarding">{{ (r.studentId?.name || 'U')[0] }}</div>
@@ -49,13 +49,23 @@
             <div class="tbl-detail-primary">{{ r.studentId?.collegeName || '-' }}</div>
             <div class="tbl-detail-secondary">{{ r.studentId?.department }}</div>
           </td>
-          <td class="tbl-text">{{ r.examId?.title }}</td>
+          <td>
+            <div class="exam-title-truncate" [title]="r.examId?.title">
+              {{ r.examId?.title }}
+            </div>
+          </td>
           <td>
             <span class="score-badge" [class]="getScoreClass(r)">
               {{ r.totalScore }}/{{ r.totalMarks }} ({{ getPercent(r) }}%)
             </span>
           </td>
           <td class="tbl-text">{{ formatTime(r.timeTakenSeconds) }}</td>
+          <td>
+            <div class="tbl-detail-primary" [style.color]="(r.screenChanges || 0) > 0 ? '#ef4444' : 'inherit'">
+              {{ r.screenChanges || 0 }} warnings
+            </div>
+            <div class="tbl-detail-secondary" style="color:#ef4444; font-weight:600;" *ngIf="r.autoSubmitted"></div>
+          </td>
           <td class="tbl-date">{{ formatDate(r.submittedAt) }}</td>
         </tr>
       </tbody>
@@ -63,7 +73,11 @@
   </div>
 
   <div class="empty-state" *ngIf="!loading && filteredResults.length === 0">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
     <p>No results yet</p>
   </div>
 </div>

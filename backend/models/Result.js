@@ -16,6 +16,8 @@ const resultSchema = new mongoose.Schema({
   totalScore: { type: Number, default: 0 },
   totalMarks: { type: Number, default: 0 },
   timeTakenSeconds: { type: Number, default: 0 },
+  screenChanges: { type: Number, default: 0 },
+  autoSubmitted: { type: Boolean, default: false },
   submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

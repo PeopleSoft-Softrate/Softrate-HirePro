@@ -15,6 +15,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/student/register/register.component').then(m => m.RegisterComponent),
     canActivate: [guestGuard]
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    canActivate: [guestGuard]
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+  },
 
   // Admin routes (inside layout)
   {
@@ -64,12 +73,15 @@ export const routes: Routes = [
       {
         path: 'results',
         loadComponent: () => import('./pages/student/results/student-results.component').then(m => m.StudentResultsComponent)
-      },
-      {
-        path: 'exam/:id',
-        loadComponent: () => import('./pages/student/take-exam/take-exam.component').then(m => m.TakeExamComponent)
       }
     ]
+  },
+
+  // Exam route — no layout/sidebar (fullscreen)
+  {
+    path: 'student/exam/:id',
+    loadComponent: () => import('./pages/student/take-exam/take-exam.component').then(m => m.TakeExamComponent),
+    canActivate: [studentGuard]
   },
 
   { path: '**', redirectTo: '/login' }

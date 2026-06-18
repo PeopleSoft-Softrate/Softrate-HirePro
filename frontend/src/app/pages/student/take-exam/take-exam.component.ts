@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,10 +15,24 @@ import { ResultService } from '../../../services/result.service';
 export class TakeExamComponent implements OnInit, OnDestroy {
   exam: any = null;
   loading = true;
+  examReady = false;  // true after exam loads, waiting for student to click Start
+  examStarted = false; // true after student clicks Start & fullscreen is entered
   submitting = false;
   submitted = false;
   submitResult: any = null;
   error = '';
+
+  // Security
+  screenChangesCount = 0;
+  showTabWarning = false;
+  warningMessage = '';
+  showFullscreenOverlay = false; // blocks exam view when fullscreen is exited
+  private visibilityHandler!: () => void;
+  private copyHandler!: (e: Event) => void;
+  private cutHandler!: (e: Event) => void;
+  private contextMenuHandler!: (e: Event) => void;
+  private fullscreenChangeHandler!: () => void;
+  private isFullscreen = false;
 
   // Current navigation
   currentSectionIndex = 0;
@@ -50,19 +64,109 @@ export class TakeExamComponent implements OnInit, OnDestroy {
         this.exam = exam;
         // Initialize answers grid
         this.answers = exam.sections.map((s: any) => s.questions.map(() => ''));
-        // Set timers
+        // Set timers (but don't start yet — wait for user to click Start)
         this.globalTimerSecs = (exam.totalDuration || 0) * 60;
         this.setSectionTimer();
-        this.startGlobalTimer();
-        this.startSectionTimer();
         this.loading = false;
+        this.examReady = true;
+        // DO NOT auto-fullscreen here — needs a real user gesture
       },
       error: () => { this.error = 'Failed to load exam.'; this.loading = false; }
     });
+
+    // Block copy/cut/paste/contextmenu
+    this.copyHandler = (e: Event) => e.preventDefault();
+    this.cutHandler = (e: Event) => e.preventDefault();
+    this.contextMenuHandler = (e: Event) => e.preventDefault();
+    document.addEventListener('copy', this.copyHandler);
+    document.addEventListener('cut', this.cutHandler);
+    document.addEventListener('contextmenu', this.contextMenuHandler);
+    document.addEventListener('paste', this.copyHandler);
+
+    // Tab switch detection
+    this.visibilityHandler = () => {
+      if (document.hidden && this.examStarted && !this.submitted) {
+        this.handleViolation('Tab switch detected!');
+      }
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+
+    // Fullscreen exit detection — show blocking overlay
+    this.fullscreenChangeHandler = () => {
+      if (!document.fullscreenElement && this.examStarted && !this.submitted) {
+        this.handleViolation('Fullscreen exit detected!');
+        this.showFullscreenOverlay = true;
+      } else if (document.fullscreenElement) {
+        this.showFullscreenOverlay = false;
+      }
+    };
+    document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
+    document.addEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
   }
 
   ngOnDestroy() {
     this.clearTimers();
+    document.removeEventListener('copy', this.copyHandler);
+    document.removeEventListener('cut', this.cutHandler);
+    document.removeEventListener('paste', this.copyHandler);
+    document.removeEventListener('contextmenu', this.contextMenuHandler);
+    document.removeEventListener('visibilitychange', this.visibilityHandler);
+    document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
+    document.removeEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
+    this.exitFullscreen();
+  }
+
+  // ---- Fullscreen ----
+  enterFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if ((el as any).webkitRequestFullscreen) {
+      (el as any).webkitRequestFullscreen();
+    }
+    this.isFullscreen = true;
+  }
+
+  exitFullscreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    this.isFullscreen = false;
+  }
+
+  // Called by the "Start Exam" button — real user click provides the gesture
+  startExam() {
+    this.enterFullscreen();
+    this.examStarted = true;
+    this.startTime = Date.now();
+    this.startGlobalTimer();
+    this.startSectionTimer();
+  }
+
+  // Called from the blocking overlay button
+  returnToFullscreen() {
+    this.enterFullscreen();
+    // Overlay hides automatically via fullscreenchange event
+  }
+
+  // Block PrintScreen and common screenshot/devtools shortcuts
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent) {
+    // Block PrintScreen
+    if (e.key === 'PrintScreen') {
+      e.preventDefault();
+      navigator.clipboard?.writeText('').catch(() => {});
+      return;
+    }
+    // Block Ctrl+P (print), Ctrl+S (save), Ctrl+Shift+I (devtools), F12
+    if (
+      (e.ctrlKey && ['p', 's', 'u'].includes(e.key.toLowerCase())) ||
+      (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 's'].includes(e.key.toLowerCase())) ||
+      e.key === 'F12'
+    ) {
+      e.preventDefault();
+      return;
+    }
   }
 
   get currentSection(): any {
@@ -90,7 +194,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
   startGlobalTimer() {
     this.globalInterval = setInterval(() => {
       this.globalTimerSecs--;
-      if (this.globalTimerSecs <= 0) { this.clearTimers(); this.submitExam(); }
+      if (this.globalTimerSecs <= 0) { this.clearTimers(); this.submit(); }
     }, 1000);
   }
 
@@ -108,7 +212,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
   autoAdvanceSection() {
     clearInterval(this.sectionInterval);
     const lastSection = this.currentSectionIndex >= this.exam.sections.length - 1;
-    if (lastSection) { this.submitExam(); return; }
+    if (lastSection) { this.submit(); return; }
     this.currentSectionIndex++;
     this.currentQuestionIndex = 0;
     this.setSectionTimer();
@@ -179,13 +283,27 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  // Security Violation Handler
+  handleViolation(reason: string) {
+    this.screenChangesCount++;
+    this.warningMessage = `${reason} (${this.screenChangesCount}/3 malpractices).`;
+    this.showTabWarning = true;
+    setTimeout(() => this.showTabWarning = false, 5000);
+
+    if (this.screenChangesCount > 3) {
+      this.warningMessage = 'Maximum malpractices exceeded. Auto-submitting exam...';
+      this.showTabWarning = true;
+      setTimeout(() => this.submit(true), 2000);
+    }
+  }
+
   // ---- Submit ----
   confirmSubmit() {
     if (!confirm('Are you sure you want to submit the exam? This action cannot be undone.')) return;
-    this.submitExam();
+    this.submit();
   }
 
-  submitExam() {
+  submit(isAutoSubmit = false) {
     if (this.submitting || this.submitted) return;
     this.clearTimers();
     this.submitting = true;
@@ -206,12 +324,16 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     this.resultService.submitExam({
       examId: this.exam._id,
       answers: flatAnswers,
-      timeTakenSeconds
+      timeTakenSeconds,
+      screenChanges: this.screenChangesCount,
+      autoSubmitted: isAutoSubmit
     }).subscribe({
       next: (res) => {
         this.submitted = true;
         this.submitting = false;
         this.submitResult = res;
+        this.exitFullscreen();
+        this.router.navigate(['/student/results']);
       },
       error: (err) => {
         this.submitting = false;

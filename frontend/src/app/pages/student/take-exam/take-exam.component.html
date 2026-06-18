@@ -9,35 +9,74 @@
   <p>{{ error }}</p>
 </div>
 
-<!-- Submitted State -->
-<div class="submitted-screen" *ngIf="submitted && submitResult">
-  <div class="submitted-card">
-    <div class="submitted-icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+<!-- Start Gate — requires click to enter fullscreen (browser requirement) -->
+<div class="exam-gate" *ngIf="examReady && !examStarted && !submitted">
+  <div class="gate-card">
+    <div class="gate-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
-    <h2>Exam Submitted!</h2>
-    <p>Your responses have been recorded successfully.</p>
+    <h2>{{ exam?.title }}</h2>
+    <p class="gate-sub">Read the instructions carefully before starting.</p>
 
-    <div class="score-display">
-      <div class="score-circle">
-        <span class="score-num">{{ submitResult.totalScore }}</span>
-        <span class="score-denom">/{{ submitResult.totalMarks }}</span>
+    <div class="gate-rules">
+      <div class="gate-rule">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <span>The exam will run in <strong>fullscreen mode</strong>. Do not exit.</span>
       </div>
-      <div class="score-label">Your Score</div>
-      <div class="score-pct">{{ (submitResult.totalScore / submitResult.totalMarks * 100) | number:'1.0-0' }}%</div>
+      <div class="gate-rule">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Tab switching is monitored and logged.</span>
+      </div>
+      <div class="gate-rule">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy, paste, and screenshots are <strong>blocked</strong>.</span>
+      </div>
+      <div class="gate-rule">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Total duration: <strong>{{ exam?.totalDuration }} minutes</strong> · {{ exam?.sections?.length }} sections</span>
+      </div>
     </div>
 
-    <div class="submit-note" *ngIf="exam?.sections?.[exam.sections.length - 1]?.questions?.[0]?.type === 'written'">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Written answers will be evaluated separately by the assessor.
-    </div>
+    <button class="btn-start-exam" (click)="startExam()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Exam Now
+    </button>
+  </div>
+</div>
 
-    <a routerLink="/student/results" class="btn-view-results">View All Results →</a>
+<!-- Redirecting State -->
+<div class="exam-loading" *ngIf="submitted">
+  <div class="spinner"></div>
+  <p>Exam submitted successfully. Redirecting to your results...</p>
+</div>
+
+<!-- Fullscreen Blocking Overlay — shown when student exits fullscreen during exam -->
+<div class="fullscreen-overlay" *ngIf="showFullscreenOverlay">
+  <div class="overlay-card">
+    <div class="overlay-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </div>
+    <h2>Fullscreen Required</h2>
+    <p>You exited fullscreen mode. The exam is paused and your screen is hidden.<br>Click the button below to return to the exam.</p>
+    <div class="overlay-warning">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      This malpractice has been recorded ({{ screenChangesCount }} total)
+    </div>
+    <button class="btn-return-fullscreen" (click)="returnToFullscreen()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      Return to Fullscreen
+    </button>
   </div>
 </div>
 
 <!-- Exam UI -->
-<div class="exam-shell" *ngIf="!loading && !submitted && exam">
+<div class="exam-shell" *ngIf="examStarted && !submitted && exam">
+
+  <!-- Security Warning Banner -->
+  <div class="security-warning" *ngIf="showTabWarning">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    {{ warningMessage }}
+  </div>
 
   <!-- Header Bar -->
   <div class="exam-header">

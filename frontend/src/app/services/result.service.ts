@@ -12,7 +12,7 @@ export class ResultService {
     return new HttpHeaders({ Authorization: `Bearer ${this.auth.getToken()}` });
   }
 
-  submitExam(data: { examId: string; answers: any[]; timeTakenSeconds: number }) {
+  submitExam(data: { examId: string; answers: any[]; timeTakenSeconds: number; screenChanges?: number; autoSubmitted?: boolean }) {
     return this.http.post<any>(`${this.apiUrl}/results/submit`, data, { headers: this.headers });
   }
 

@@ -212,6 +212,14 @@ p {
   white-space: nowrap;
 }
 
+.exam-title-truncate {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
 .tbl-detail-primary {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);

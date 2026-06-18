@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema({
   department: { type: String, trim: true },
   graduationYear: { type: Number },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'student'], default: 'student' }
+  role: { type: String, enum: ['admin', 'student'], default: 'student' },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date }
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {
