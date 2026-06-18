@@ -26,6 +26,14 @@ export class StudentDashboardComponent implements OnInit {
   get userInitial() { return this.currentUser?.name?.charAt(0).toUpperCase() || 'S'; }
   get firstName() { return this.currentUser?.name?.split(' ')[0] || ''; }
 
+  get greeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    if (hour < 21) return 'Good evening';
+    return 'Good night';
+  }
+
   get pendingExams() {
     return this.exams.filter(e => !this.hasAttempted(e._id));
   }
@@ -72,6 +80,24 @@ export class StudentDashboardComponent implements OnInit {
 
   getPercent(r: any): number {
     return Math.round((r.totalScore / (r.totalMarks || 1)) * 100);
+  }
+
+  formatTime(secs: number): string {
+    if (!secs) return '-';
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${s}s`;
+  }
+
+  formatDate(d: string): string {
+    return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  getScoreClass(r: any): string {
+    const pct = this.getPercent(r);
+    if (pct >= 70) return 'good';
+    if (pct >= 40) return 'average';
+    return 'low';
   }
 
   logout() {
