@@ -1,39 +1,60 @@
 <div class="login-page">
   <!-- Left Panel -->
   <div class="login-left">
-    <div class="brand">
+    <div class="bg-decoration">
+      <div class="deco-circle c1"></div>
+      <div class="deco-circle c2"></div>
+      <div class="deco-circle c3"></div>
+    </div>F
+    
+    <div class="brand-top">
       <div class="brand-logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="10" fill="white" fill-opacity="0.15"/>
-          <path d="M8 22L14 10L20 18L24 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="24" cy="13" r="2" fill="white"/>
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
         </svg>
       </div>
       <span class="brand-name">Softrate Hire Pro</span>
     </div>
-    <div class="left-content">
+
+    <div class="left-hero">
       <h1>Assess. Identify.<br>Hire the Best.</h1>
       <p>A powerful online assessment platform for campus hiring. Built for speed, fairness, and insight.</p>
-      <div class="stats-row">
-        <div class="stat"><span class="stat-num">4</span><span class="stat-label">Stages</span></div>
-        <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">27</span><span class="stat-label">Questions</span></div>
-        <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">60</span><span class="stat-label">Marks</span></div>
+      
+      <div class="stats-bento glass-panel">
+        <div class="stat-col">
+          <span class="stat-val">4</span>
+          <span class="stat-lbl">STAGES</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-col">
+          <span class="stat-val">27</span>
+          <span class="stat-lbl">QUESTIONS</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-col">
+          <span class="stat-val">60</span>
+          <span class="stat-lbl">MARKS</span>
+        </div>
       </div>
     </div>
-    <div class="left-decoration">
-      <div class="deco-circle c1"></div>
-      <div class="deco-circle c2"></div>
-      <div class="deco-circle c3"></div>
-    </div>
+
+
   </div>
 
   <!-- Right Panel -->
   <div class="login-right">
-    <div class="login-card">
+    <div class="mobile-header">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+        </svg>
+      </div>
+      <span class="brand-name">Softrate Hire Pro</span>
+    </div>
+
+    <div class="login-card-wrapper">
       <div class="card-header">
-        <h2>Welcome back</h2>
+        <h2>Welcome Back</h2>
         <p>Sign in to your account to continue</p>
       </div>
 
@@ -41,11 +62,11 @@
         <div class="form-group" [class.has-error]="error">
           <label for="email">Email address</label>
           <div class="input-wrapper">
-            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6"/>
             </svg>
-            <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="you@email.com" autocomplete="email" />
+            <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="name@company.com" required />
           </div>
         </div>
 
@@ -55,16 +76,21 @@
             <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
           </div>
           <div class="input-wrapper">
-            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <input id="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" placeholder="Enter your password" autocomplete="current-password" />
+            <input id="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" placeholder="••••••••••••" required />
             <button type="button" class="toggle-pass" (click)="showPassword = !showPassword" tabindex="-1">
-              <svg *ngIf="!showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg *ngIf="showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
           </div>
+        </div>
+
+        <div class="remember-row">
+          <input type="checkbox" id="remember" />
+          <label for="remember">Remember this device</label>
         </div>
 
         <div class="error-msg" *ngIf="error">
@@ -73,7 +99,7 @@
         </div>
 
         <button type="submit" class="btn-login" [disabled]="loading">
-          <span *ngIf="!loading">Sign In</span>
+          <span *ngIf="!loading" style="display: flex; align-items: center; justify-content: center; gap: 8px;">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
           <span *ngIf="loading" class="spinner-sm"></span>
         </button>
       </form>
@@ -81,6 +107,24 @@
       <div class="card-footer">
         <p>New student? <a routerLink="/student/register">Register here</a></p>
       </div>
+
+      <div class="trusted-badge">
+        <span>TRUSTED BY HIRING TEAMS AT</span>
+        <div class="trusted-logos">
+          <div class="logo-box"></div>
+          <div class="logo-box w2"></div>
+          <div class="logo-box w3"></div>
+        </div>
+      </div>
     </div>
+
+    <footer class="login-footer">
+      <p>© 2024 Softrate Hire Pro. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Support</a>
+      </div>
+    </footer>
   </div>
 </div>

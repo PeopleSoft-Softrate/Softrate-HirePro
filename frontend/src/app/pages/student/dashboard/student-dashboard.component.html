@@ -1,55 +1,125 @@
-<div class="page-wrap">
-  <div class="page-head">
-    <div>
-      <h1>Welcome, {{ auth.currentUser?.name }}!</h1>
-      <p>Available assessments for you</p>
+<div *ngIf="loading" class="main-canvas flex items-center justify-center min-h-screen" style="background-color: #FAFAFA;">
+  <div class="spinner-sm" style="border-color: #2563EB; border-top-color: transparent; width: 40px; height: 40px; border-width: 4px;"></div>
+</div>
+
+<div *ngIf="!loading">
+  <!-- Dark Sidebar -->
+  <aside class="sidebar" id="sidebar" [class.collapsed]="!sidebarOpen">
+    
+    <div class="brand">
+      <span *ngIf="sidebarOpen" style="white-space: nowrap; overflow: hidden;">Softrate</span>
+      <button class="icon-btn" (click)="toggleSidebar()" style="flex-shrink: 0; background: transparent; border: none; color: var(--sidebar-text);" [style.margin]="!sidebarOpen ? '0 auto' : '0'">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
     </div>
-  </div>
 
-  <div class="loading-state" *ngIf="loading">
-    <div class="spinner"></div><p>Loading exams...</p>
-  </div>
+    <nav class="nav-links">
+      <a routerLink="/student/dashboard" class="nav-item active" [title]="!sidebarOpen ? 'Dashboard' : ''">
+        <span class="material-symbols-outlined" style="font-size: 20px;">dashboard</span>
+        <span *ngIf="sidebarOpen">Dashboard</span>
+      </a>
+      <a routerLink="/student/results" class="nav-item" [title]="!sidebarOpen ? 'Results' : ''">
+        <span class="material-symbols-outlined" style="font-size: 20px;">analytics</span>
+        <span *ngIf="sidebarOpen">Results</span>
+      </a>
+    </nav>
 
-  <div class="exams-grid" *ngIf="!loading">
-    <div class="exam-card" *ngFor="let exam of exams">
-      <div class="exam-card-top">
-        <div class="duration-badge">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {{ exam.totalDuration }} min
-        </div>
-        <div class="marks-badge">{{ exam.totalMarks }} marks</div>
-      </div>
-
-      <h3 class="exam-title">{{ exam.title }}</h3>
-      <p class="exam-desc">{{ exam.description || 'No description' }}</p>
-
-      <div class="exam-meta">
-        <span>{{ exam.sectionsCount }} sections</span>
-        <span>·</span>
-        <span>{{ exam.totalQuestions }} questions</span>
-      </div>
-
-      <!-- Attempted State -->
-      <div class="attempted-info" *ngIf="hasAttempted(exam._id)">
-        <div class="score-info">
-          <span class="score-label">Your Score:</span>
-          <span class="score-val" [class]="getScoreClass(getResult(exam._id))">
-            {{ getResult(exam._id).totalScore }}/{{ getResult(exam._id).totalMarks }}
-            ({{ getPercent(getResult(exam._id)) }}%)
-          </span>
-        </div>
-        <a [routerLink]="['/student/results']" class="btn-view">View Results</a>
-      </div>
-
-      <!-- Not Attempted State -->
-      <a *ngIf="!hasAttempted(exam._id)" [routerLink]="['/student/exam', exam._id]" class="btn-start">
-        Start Exam →
+    <div class="sidebar-bottom">
+      <a href="javascript:void(0)" (click)="logout()" class="nav-item" [title]="!sidebarOpen ? 'Sign Out' : ''" style="color: #F87171;">
+        <span class="material-symbols-outlined" style="font-size: 20px;">logout</span>
+        <span *ngIf="sidebarOpen">Sign Out</span>
       </a>
     </div>
+  </aside>
 
-    <div class="empty-state" *ngIf="exams.length === 0">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <p>No exams available right now</p>
+  <!-- Main Canvas -->
+  <main class="main-canvas" [class.collapsed-main]="!sidebarOpen">
+    
+    <div class="workspace">
+      
+      <!-- Top Section -->
+      <div class="workspace-header">
+        <div>
+          <h2 class="text-title" style="margin-bottom: 0.25rem;">Good morning, {{ firstName }}</h2>
+          <p class="text-body">Here's your assessment overview for today.</p>
+        </div>
+        
+        <div class="header-actions">
+          <input type="text" class="search-input" placeholder="Search assessments...">
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="text-meta">Active Assessments</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="15.002" cy="16" r="6" />
+              <path d="M15.002 13.5V16L16.502 17" />
+              <path d="M13.498 2H8.49805C7.66962 2 6.99805 2.67157 6.99805 3.5C6.99805 4.32843 7.66962 5 8.49805 5H13.498C14.3265 5 14.998 4.32843 14.998 3.5C14.998 2.67157 14.3265 2 13.498 2Z" />
+              <path d="M14.9981 3.5C16.5515 3.54681 17.4781 3.72007 18.1194 4.36137C18.6913 4.93328 18.891 5.73206 18.9607 7M6.99795 3.5C5.44456 3.54681 4.51802 3.72007 3.87673 4.36136C2.99805 5.24004 2.99805 6.65425 2.99806 9.48269L2.99805 15.9995C2.99805 18.8279 2.99806 20.2421 3.87674 21.1208C4.51802 21.7621 5.44457 21.9353 6.99795 21.9821" />
+            </svg>
+          </div>
+          <span class="stat-value">{{ pendingCount }}</span>
+        </div>
+        <div class="stat-card">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="text-meta">Completed</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 13.5V8C19 5.17157 19 3.75736 18.1213 2.87868C17.2426 2 15.8284 2 13 2H9C6.17157 2 4.75736 2 3.87868 2.87868C3 3.75736 3 5.17157 3 8V16C3 18.8284 3 20.2426 3.87868 21.1213C4.75736 22 6.17157 22 9 22H12" />
+              <path d="M14.5 2H7.5C7.5 3.41421 7.5 4.12132 7.93934 4.56066C8.37868 5 9.08579 5 10.5 5H11.5C12.9142 5 13.6213 5 14.0607 4.56066C14.5 4.12132 14.5 3.41421 14.5 2Z" />
+              <path d="M7 15H11M7 11H15" />
+              <path d="M14 20C14 20 15 20 16 22C16 22 18.1765 17 21 16" />
+            </svg>
+          </div>
+          <span class="stat-value">{{ completedCount }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="text-meta">Average Score</span>
+          <span class="stat-value">{{ averageScore }}%</span>
+        </div>
+        <div class="stat-card">
+          <span class="text-meta">Pending</span>
+          <span class="stat-value">{{ pendingCount }}</span>
+        </div>
+      </div>
+
+      <!-- Available Assessments -->
+      <div>
+        <h3 class="text-section section-header">Available Assessments</h3>
+        
+        <div class="assessment-list">
+          
+          <div *ngIf="pendingExams.length === 0" class="stat-card" style="align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center;">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--border); margin-bottom: 1rem;">check_circle</span>
+            <p class="text-body-strong" style="font-size: 16px;">You're all caught up!</p>
+            <p class="text-body">There are no pending assessments at the moment.</p>
+          </div>
+
+          <div class="assessment-card" *ngFor="let exam of pendingExams">
+            <h4 class="text-section">{{ exam.title }}</h4>
+            
+            <div class="meta-row text-meta">
+              <span>{{ exam.totalMarks }} Marks</span>
+              <span class="meta-dot">•</span>
+              <span>{{ exam.totalDuration }} Minutes</span>
+              <span class="meta-dot">•</span>
+              <span style="color: var(--primary);">New Opportunity</span>
+            </div>
+            
+            <p class="text-body" style="max-width: 800px;">
+              {{ exam.description || 'Online Assessment covering various logical and technical evaluations required for this specific role.' }}
+            </p>
+            
+            <a [routerLink]="['/student/take-exam', exam._id]" class="link-btn">
+              Start Assessment <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
     </div>
-  </div>
+  </main>
 </div>
