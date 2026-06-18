@@ -6,7 +6,8 @@ const answerSchema = new mongoose.Schema({
   questionIndex: { type: Number },
   answer: { type: String, default: '' }, // MCQ: selected option; written: text
   isCorrect: { type: Boolean },
-  marksEarned: { type: Number, default: 0 }
+  marksEarned: { type: Number, default: 0 },
+  aiFeedback: { type: String }
 }, { _id: false });
 
 const resultSchema = new mongoose.Schema({
