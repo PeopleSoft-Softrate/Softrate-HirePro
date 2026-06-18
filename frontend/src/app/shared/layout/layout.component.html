@@ -21,10 +21,7 @@
       </button>
     </div>
 
-    <!-- Role Badge -->
-    <div class="role-badge" *ngIf="sidebarOpen">
-      <span class="badge-pill" [class.admin]="isAdmin">{{ isAdmin ? 'Admin' : 'Student' }}</span>
-    </div>
+
 
     <!-- Navigation -->
     <nav class="sidebar-nav">
@@ -33,7 +30,7 @@
          routerLinkActive="active"
          class="nav-item"
          [title]="link.label">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" [innerHTML]="getIcon(link.icon)"></svg>
+        <span class="nav-icon" [innerHTML]="getIcon(link.icon)"></span>
         <span class="nav-label" *ngIf="sidebarOpen">{{ link.label }}</span>
       </a>
     </nav>

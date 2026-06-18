@@ -15,6 +15,7 @@ export class RegisterComponent {
   form = {
     name: '',
     email: '',
+    password: '',
     mobile: '',
     collegeName: '',
     department: '',
@@ -23,14 +24,19 @@ export class RegisterComponent {
   loading = false;
   error = '';
   success = false;
+  showPassword = false;
 
   constructor(private studentService: StudentService) {}
 
   get currentYear() { return new Date().getFullYear(); }
 
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   onSubmit() {
-    const { name, email, mobile, collegeName, department, graduationYear } = this.form;
-    if (!name || !email || !mobile || !collegeName || !department || !graduationYear) {
+    const { name, email, password, mobile, collegeName, department, graduationYear } = this.form;
+    if (!name || !email || !password || !mobile || !collegeName || !department || !graduationYear) {
       this.error = 'Please fill all fields.';
       return;
     }

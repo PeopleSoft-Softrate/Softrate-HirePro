@@ -8,37 +8,28 @@ const { generatePassword } = require('../utils/generatePassword');
 // POST /api/students/register  (public)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, mobile, collegeName, department, graduationYear } = req.body;
+    const { name, email, password, mobile, collegeName, department, graduationYear } = req.body;
 
-    if (!name || !email)
-      return res.status(400).json({ message: 'Name and email are required' });
+    if (!name || !email || !password)
+      return res.status(400).json({ message: 'Name, email, and password are required' });
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing)
       return res.status(409).json({ message: 'Email already registered' });
 
-    const plainPassword = generatePassword();
-
     const user = await User.create({
       name,
       email: email.toLowerCase(),
+      password, // Password will be hashed by the User model's pre-save hook
       mobile,
       collegeName,
       department,
       graduationYear,
-      password: plainPassword,
       role: 'student'
     });
 
-    // Send credentials email (non-blocking)
-    try {
-      await sendCredentials(name, email, plainPassword);
-    } catch (emailErr) {
-      console.error('Email failed, but user was created:', emailErr.message);
-    }
-
     res.status(201).json({
-      message: 'Registration successful! Check your email for login credentials.',
+      message: 'Registration successful! You can now log in.',
       userId: user._id
     });
   } catch (err) {
