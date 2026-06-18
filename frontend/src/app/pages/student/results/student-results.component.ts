@@ -1,3 +1,4 @@
+// Force rebuild
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -15,8 +16,20 @@ export class StudentResultsComponent implements OnInit {
   results: any[] = [];
   loading = true;
   expandedId: string | null = null;
+  sidebarOpen = true;
 
   constructor(private resultService: ResultService, public auth: AuthService) {}
+
+  get currentUser() { return this.auth.currentUser; }
+  get userInitial() { return this.currentUser?.name?.charAt(0).toUpperCase() || 'S'; }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  logout() {
+    this.auth.logout();
+  }
 
   ngOnInit() {
     this.resultService.getMyResults().subscribe({
