@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://softrate-hire-pro-lzbt.vercel.app/api'
+  apiUrl: 'https://softrate-hirepro.onrender.com/api'
 };

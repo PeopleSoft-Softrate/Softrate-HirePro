@@ -20,8 +20,6 @@ mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
-    family: 4, // Force IPv4 to prevent Vercel DNS resolution issues
-    maxPoolSize: 10 // Limit connections for serverless
   })
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
