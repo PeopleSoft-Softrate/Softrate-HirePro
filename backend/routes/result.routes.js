@@ -55,7 +55,7 @@ router.post('/submit', protect, async (req, res) => {
         try {
           const ai = new GoogleGenAI({ apiKey: key });
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.1-flash-lite',
             contents: promptText,
           });
           

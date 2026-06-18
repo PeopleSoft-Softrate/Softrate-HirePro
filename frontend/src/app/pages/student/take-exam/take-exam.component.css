@@ -689,7 +689,7 @@
 
 .q-type-badge.written {
   background: var(--warning-color);
-  color: var(--warning-color);
+  color: #ffffff;
 }
 
 .q-marks {
