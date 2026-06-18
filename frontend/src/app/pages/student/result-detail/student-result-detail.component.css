@@ -1,0 +1,165 @@
+.page-wrap {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #3b82f6;
+}
+
+.page-head h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.page-head p {
+  color: #64748b;
+  font-size: 1.05rem;
+}
+
+.result-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 3rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.warning-banner {
+  background: #fef2f2;
+  color: #ef4444;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 1px solid #fecaca;
+  text-align: center;
+}
+
+.chart-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  flex-wrap: wrap;
+}
+
+/* Semi Circle Gauge */
+.gauge-container {
+  position: relative;
+  width: 280px;
+  height: 140px; /* half width */
+}
+
+.gauge-svg {
+  width: 100%;
+  height: auto;
+  transform: rotateY(180deg); /* Flip so fill starts from left (left to right) */
+}
+
+.gauge-bg {
+  stroke: #f1f5f9;
+  stroke-width: 12px;
+}
+
+.gauge-fill {
+  stroke: #16a34a; /* green */
+  stroke-width: 12px;
+  stroke-dasharray: 125.66;
+  transition: stroke-dashoffset 1s ease-out;
+}
+
+.gauge-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  transform: translateY(20%); /* Move down slightly to center in the donut hole */
+}
+
+.gauge-text .pct {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  font-family: var(--font-heading);
+}
+
+.gauge-text .lbl {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* Stats Legend */
+.stats-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-dot.correct { background: #16a34a; }
+.legend-dot.incorrect { background: #ef4444; }
+.legend-dot.unanswered { background: #cbd5e1; }
+
+.legend-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 160px;
+}
+
+.legend-lbl {
+  font-size: 0.95rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.legend-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.loading-state, .error-state {
+  text-align: center;
+  padding: 4rem;
+  color: #64748b;
+}
+
+@media (max-width: 600px) {
+  .chart-section {
+    flex-direction: column;
+    gap: 3rem;
+  }
+}

@@ -1,0 +1,65 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <a routerLink="/student/dashboard" class="back-link">← Back to Dashboard</a>
+      <h1>Exam Result</h1>
+      <p *ngIf="result">{{ result?.examId?.title }}</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div><p>Loading result...</p>
+  </div>
+
+  <div class="result-card" *ngIf="!loading && result">
+    
+    <div class="warning-banner" *ngIf="result.autoSubmitted">
+      This exam was automatically submitted due to excessive tab switching or exiting fullscreen.
+    </div>
+
+    <div class="chart-section">
+      <!-- Half Donut Chart -->
+      <div class="gauge-container">
+        <svg viewBox="0 0 100 55" class="gauge-svg">
+          <path class="gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-linecap="round"/>
+          <path class="gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-linecap="round"
+                [style.stroke-dashoffset]="getDashOffset()"/>
+        </svg>
+        <div class="gauge-text">
+          <div class="pct">{{ percentage }}%</div>
+          <div class="lbl">Score</div>
+        </div>
+      </div>
+
+      <!-- Stats Breakdown -->
+      <div class="stats-legend">
+        <div class="legend-item">
+          <div class="legend-dot correct"></div>
+          <div class="legend-info">
+            <span class="legend-lbl">Correct Answers</span>
+            <span class="legend-val">{{ correctCount }}</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot incorrect"></div>
+          <div class="legend-info">
+            <span class="legend-lbl">Incorrect Answers</span>
+            <span class="legend-val">{{ incorrectCount }}</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot unanswered"></div>
+          <div class="legend-info">
+            <span class="legend-lbl">Unanswered</span>
+            <span class="legend-val">{{ unansweredCount }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div class="error-state" *ngIf="!loading && !result">
+    <p>Result not found.</p>
+  </div>
+</div>

@@ -21,6 +21,24 @@ export class TakeExamComponent implements OnInit, OnDestroy {
   submitted = false;
   submitResult: any = null;
   error = '';
+  showExitConfirm = false;
+
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: any) {
+    if (this.examStarted && !this.submitted && !this.submitting) {
+      window.history.pushState(null, '', window.location.href);
+      this.showExitConfirm = true;
+    }
+  }
+
+  cancelExit() {
+    this.showExitConfirm = false;
+  }
+
+  confirmExit() {
+    this.showExitConfirm = false;
+    this.submit(true);
+  }
 
   // Security
   screenChangesCount = 0;
@@ -139,6 +157,8 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     this.enterFullscreen();
     this.examStarted = true;
     this.startTime = Date.now();
+    // Push state so back button triggers popstate without leaving page immediately
+    window.history.pushState(null, '', window.location.href);
     this.startGlobalTimer();
     this.startSectionTimer();
   }
@@ -333,7 +353,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.submitResult = res;
         this.exitFullscreen();
-        this.router.navigate(['/student/results']);
+        this.router.navigate(['/student/result', this.submitResult.resultId]);
       },
       error: (err) => {
         this.submitting = false;
