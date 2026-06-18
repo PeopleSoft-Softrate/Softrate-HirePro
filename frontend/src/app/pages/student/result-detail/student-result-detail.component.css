@@ -69,7 +69,6 @@
 .gauge-svg {
   width: 100%;
   height: auto;
-  transform: rotateY(180deg); /* Flip so fill starts from left (left to right) */
 }
 
 .gauge-bg {

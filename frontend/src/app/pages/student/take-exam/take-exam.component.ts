@@ -111,6 +111,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     document.addEventListener('copy', this.copyHandler);
     document.addEventListener('cut', this.cutHandler);
     document.addEventListener('contextmenu', this.contextMenuHandler);
+    document.addEventListener('paste', this.copyHandler);
 
     // Tab switch detection
     this.visibilityHandler = () => {
@@ -137,6 +138,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     this.clearTimers();
     document.removeEventListener('copy', this.copyHandler);
     document.removeEventListener('cut', this.cutHandler);
+    document.removeEventListener('paste', this.copyHandler);
     document.removeEventListener('contextmenu', this.contextMenuHandler);
     document.removeEventListener('visibilitychange', this.visibilityHandler);
     document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);

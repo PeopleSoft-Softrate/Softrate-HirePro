@@ -72,4 +72,10 @@ export class StudentResultDetailComponent implements OnInit {
     const totalLength = 125.66; // length of semi-circle path
     return totalLength - (totalLength * this.percentage / 100);
   }
+
+  getGaugeColor(): string {
+    if (this.percentage >= 70) return '#16a34a'; // green
+    if (this.percentage >= 40) return 'var(--warning-color)'; // orange
+    return '#ef4444'; // red
+  }
 }

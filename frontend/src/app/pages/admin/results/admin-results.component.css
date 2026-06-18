@@ -71,11 +71,11 @@
 }
 .score-badge.good {
   background: var(--success-color);
-  color: var(--success-color);
+  color: #ffffff;
 }
 .score-badge.average {
   background: var(--warning-color);
-  color: var(--warning-color);
+  color: #ffffff;
 }
 .score-badge.low {
   background: var(--hc-danger-bg);
