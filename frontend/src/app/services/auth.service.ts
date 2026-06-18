@@ -20,19 +20,25 @@ export class AuthService {
 
   private loadUser(): AuthUser | null {
     try {
+      const token = localStorage.getItem('hp_token');
       const u = localStorage.getItem('hp_user');
-      return u ? JSON.parse(u) : null;
-    } catch { return null; }
+      if (token && u) return JSON.parse(u);
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   login(email: string, password: string) {
-    return this.http.post<{ token: string; user: AuthUser }>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
-      tap(res => {
-        localStorage.setItem('hp_token', res.token);
-        localStorage.setItem('hp_user', JSON.stringify(res.user));
-        this.userSubject.next(res.user);
-      })
-    );
+    return this.http
+      .post<{ token: string; user: AuthUser }>(`${this.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap(res => {
+          localStorage.setItem('hp_token', res.token);
+          localStorage.setItem('hp_user', JSON.stringify(res.user));
+          this.userSubject.next(res.user);
+        })
+      );
   }
 
   logout() {
@@ -51,14 +57,14 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return !!this.userSubject.value && !!localStorage.getItem('hp_token');
   }
 
   isAdmin(): boolean {
-    return this.currentUser?.role === 'admin';
+    return this.userSubject.value?.role === 'admin';
   }
 
   isStudent(): boolean {
-    return this.currentUser?.role === 'student';
+    return this.userSubject.value?.role === 'student';
   }
 }

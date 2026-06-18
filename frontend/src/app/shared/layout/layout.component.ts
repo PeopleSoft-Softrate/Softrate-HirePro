@@ -18,21 +18,17 @@ export class LayoutComponent {
   get user() { return this.auth.currentUser; }
   get isAdmin() { return this.auth.isAdmin(); }
 
-  get adminLinks() {
-    return [
-      { path: '/admin/dashboard', label: 'Dashboard', icon: 'grid' },
-      { path: '/admin/exams', label: 'Exams', icon: 'file-text' },
-      { path: '/admin/results', label: 'Results', icon: 'bar-chart' },
-      { path: '/admin/students', label: 'Students', icon: 'users' },
-    ];
-  }
+  adminLinks = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: 'grid' },
+    { path: '/admin/exams', label: 'Exams', icon: 'file-text' },
+    { path: '/admin/results', label: 'Results', icon: 'bar-chart' },
+    { path: '/admin/students', label: 'Students', icon: 'users' },
+  ];
 
-  get studentLinks() {
-    return [
-      { path: '/student/dashboard', label: 'Dashboard', icon: 'grid' },
-      { path: '/student/results', label: 'My Results', icon: 'bar-chart' },
-    ];
-  }
+  studentLinks = [
+    { path: '/student/dashboard', label: 'Dashboard', icon: 'grid' },
+    { path: '/student/results', label: 'My Results', icon: 'bar-chart' },
+  ];
 
   get navLinks() {
     return this.isAdmin ? this.adminLinks : this.studentLinks;
