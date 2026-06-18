@@ -1,0 +1,55 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <h1>Welcome, {{ auth.currentUser?.name }}!</h1>
+      <p>Available assessments for you</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div><p>Loading exams...</p>
+  </div>
+
+  <div class="exams-grid" *ngIf="!loading">
+    <div class="exam-card" *ngFor="let exam of exams">
+      <div class="exam-card-top">
+        <div class="duration-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ exam.totalDuration }} min
+        </div>
+        <div class="marks-badge">{{ exam.totalMarks }} marks</div>
+      </div>
+
+      <h3 class="exam-title">{{ exam.title }}</h3>
+      <p class="exam-desc">{{ exam.description || 'No description' }}</p>
+
+      <div class="exam-meta">
+        <span>{{ exam.sectionsCount }} sections</span>
+        <span>·</span>
+        <span>{{ exam.totalQuestions }} questions</span>
+      </div>
+
+      <!-- Attempted State -->
+      <div class="attempted-info" *ngIf="hasAttempted(exam._id)">
+        <div class="score-info">
+          <span class="score-label">Your Score:</span>
+          <span class="score-val" [class]="getScoreClass(getResult(exam._id))">
+            {{ getResult(exam._id).totalScore }}/{{ getResult(exam._id).totalMarks }}
+            ({{ getPercent(getResult(exam._id)) }}%)
+          </span>
+        </div>
+        <a [routerLink]="['/student/results']" class="btn-view">View Results</a>
+      </div>
+
+      <!-- Not Attempted State -->
+      <a *ngIf="!hasAttempted(exam._id)" [routerLink]="['/student/exam', exam._id]" class="btn-start">
+        Start Exam →
+      </a>
+    </div>
+
+    <div class="empty-state" *ngIf="exams.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <p>No exams available right now</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,157 @@
+<!-- Loading -->
+<div class="exam-loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading exam...</p>
+</div>
+
+<!-- Error -->
+<div class="exam-error" *ngIf="error">
+  <p>{{ error }}</p>
+</div>
+
+<!-- Submitted State -->
+<div class="submitted-screen" *ngIf="submitted && submitResult">
+  <div class="submitted-card">
+    <div class="submitted-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Exam Submitted!</h2>
+    <p>Your responses have been recorded successfully.</p>
+
+    <div class="score-display">
+      <div class="score-circle">
+        <span class="score-num">{{ submitResult.totalScore }}</span>
+        <span class="score-denom">/{{ submitResult.totalMarks }}</span>
+      </div>
+      <div class="score-label">Your Score</div>
+      <div class="score-pct">{{ (submitResult.totalScore / submitResult.totalMarks * 100) | number:'1.0-0' }}%</div>
+    </div>
+
+    <div class="submit-note" *ngIf="exam?.sections?.[exam.sections.length - 1]?.questions?.[0]?.type === 'written'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Written answers will be evaluated separately by the assessor.
+    </div>
+
+    <a routerLink="/student/results" class="btn-view-results">View All Results →</a>
+  </div>
+</div>
+
+<!-- Exam UI -->
+<div class="exam-shell" *ngIf="!loading && !submitted && exam">
+
+  <!-- Header Bar -->
+  <div class="exam-header">
+    <div class="exam-title-info">
+      <div class="exam-name">{{ exam.title }}</div>
+      <div class="exam-section-name">{{ currentSection?.name }}</div>
+    </div>
+
+    <!-- Timers -->
+    <div class="timers">
+      <div class="timer-item section-timer" [class]="sectionTimerClass">
+        <div class="timer-label">Section</div>
+        <div class="timer-val">{{ formatTime(sectionTimerSecs) }}</div>
+      </div>
+      <div class="timer-divider"></div>
+      <div class="timer-item global-timer" [class]="globalTimerClass">
+        <div class="timer-label">Total</div>
+        <div class="timer-val">{{ formatTime(globalTimerSecs) }}</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="header-right">
+      <span class="progress-text">{{ getTotalAnswered() }}/{{ getTotalQuestions() }} answered</span>
+      <button class="btn-submit-header" (click)="confirmSubmit()" [disabled]="submitting">
+        {{ submitting ? 'Submitting...' : 'Submit Exam' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="exam-body">
+
+    <!-- Left: Section Nav -->
+    <div class="section-nav">
+      <div class="section-nav-inner" *ngFor="let section of exam.sections; let sIdx = index">
+        <div class="section-nav-title" [class.active-section]="sIdx === currentSectionIndex">
+          <span class="section-num">{{ sIdx + 1 }}</span>
+          <span class="section-name">{{ section.name }}</span>
+        </div>
+        <div class="question-dots">
+          <button *ngFor="let q of section.questions; let qIdx = index"
+            class="q-dot"
+            [class.answered]="isAnswered(sIdx, qIdx)"
+            [class.current]="sIdx === currentSectionIndex && qIdx === currentQuestionIndex"
+            (click)="goToQuestion(sIdx, qIdx)">
+            {{ qIdx + 1 }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Question Area -->
+    <div class="question-area">
+      <div class="question-card" *ngIf="currentQuestion">
+        <div class="question-meta">
+          <span class="q-badge">Q{{ currentQuestionIndex + 1 }}</span>
+          <span class="q-type-badge" [class.written]="currentQuestion.type === 'written'">
+            {{ currentQuestion.type === 'mcq' ? 'MCQ' : 'Written' }}
+          </span>
+          <span class="q-marks">{{ currentQuestion.marks }} mark(s)</span>
+        </div>
+
+        <div class="question-text">{{ currentQuestion.text }}</div>
+
+        <!-- MCQ Options -->
+        <div class="options-list" *ngIf="currentQuestion.type === 'mcq'">
+          <label *ngFor="let opt of currentQuestion.options; let oIdx = index"
+            class="option-item"
+            [class.selected]="currentAnswer === opt">
+            <input type="radio"
+              [name]="'q_' + currentSectionIndex + '_' + currentQuestionIndex"
+              [value]="opt"
+              [(ngModel)]="answers[currentSectionIndex][currentQuestionIndex]"
+              (change)="currentAnswer = opt" />
+            <span class="option-letter">{{ ['A','B','C','D'][oIdx] }}</span>
+            <span class="option-text">{{ opt }}</span>
+          </label>
+        </div>
+
+        <!-- Written Answer -->
+        <div class="written-area" *ngIf="currentQuestion.type === 'written'">
+          <div class="written-hints" *ngIf="currentQuestion.rubric?.length">
+            <div class="hint-label">Evaluation Criteria:</div>
+            <div class="rubric-chips">
+              <span *ngFor="let r of currentQuestion.rubric" class="rubric-chip">
+                {{ r.criterion }} ({{ r.marks }}m)
+              </span>
+            </div>
+          </div>
+          <textarea
+            [(ngModel)]="answers[currentSectionIndex][currentQuestionIndex]"
+            [name]="'written_' + currentSectionIndex + '_' + currentQuestionIndex"
+            placeholder="Write your answer here..."
+            rows="8"
+            class="written-textarea"
+            style="height:auto;overflow:auto !important;resize:vertical !important;"
+          ></textarea>
+          <div class="char-count">{{ (answers[currentSectionIndex][currentQuestionIndex] || '').length }} characters</div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="nav-buttons">
+        <button class="btn-nav prev" (click)="prevQuestion()"
+          [disabled]="currentSectionIndex === 0 && currentQuestionIndex === 0">
+          ← Previous
+        </button>
+        <button class="btn-nav next" (click)="nextQuestion()" *ngIf="!isLastQuestion">
+          Next →
+        </button>
+        <button class="btn-nav submit-final" (click)="confirmSubmit()" *ngIf="isLastQuestion" [disabled]="submitting">
+          {{ submitting ? 'Submitting...' : '✓ Submit Exam' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

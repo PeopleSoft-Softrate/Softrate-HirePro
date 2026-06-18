@@ -1,0 +1,99 @@
+<div class="register-page">
+  <div class="register-left">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="10" fill="white" fill-opacity="0.15"/>
+          <path d="M8 22L14 10L20 18L24 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="24" cy="13" r="2" fill="white"/>
+        </svg>
+      </div>
+      <span class="brand-name">Softrate Hire Pro</span>
+    </div>
+    <div class="left-content">
+      <h1>Start Your<br>Journey Today</h1>
+      <p>Register for Softrate's campus hiring assessment. Get your credentials delivered straight to your inbox.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><span>Fill in your details</span></div>
+        <div class="step"><div class="step-num">2</div><span>Receive credentials via email</span></div>
+        <div class="step"><div class="step-num">3</div><span>Log in and take the assessment</span></div>
+      </div>
+    </div>
+    <div class="left-decoration">
+      <div class="deco-circle c1"></div>
+      <div class="deco-circle c2"></div>
+    </div>
+  </div>
+
+  <div class="register-right">
+    <div class="register-card">
+
+      <!-- Success State -->
+      <div class="success-state" *ngIf="success">
+        <div class="success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Registration Successful!</h2>
+        <p>Check your email <strong>{{ form.email }}</strong> for your login credentials. Please check your spam folder if you don't see it.</p>
+        <a routerLink="/login" class="btn-goto-login">Go to Login →</a>
+      </div>
+
+      <!-- Form State -->
+      <div *ngIf="!success">
+        <div class="card-header">
+          <h2>Create Account</h2>
+          <p>Register as a student candidate</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" [(ngModel)]="form.name" name="name" placeholder="John Doe" />
+            </div>
+            <div class="form-group">
+              <label>Email Address *</label>
+              <input type="email" [(ngModel)]="form.email" name="email" placeholder="you@email.com" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mobile Number *</label>
+              <input type="tel" [(ngModel)]="form.mobile" name="mobile" placeholder="+91 98765 43210" />
+            </div>
+            <div class="form-group">
+              <label>Graduation Year *</label>
+              <input type="number" [(ngModel)]="form.graduationYear" name="graduationYear" [min]="2020" [max]="currentYear + 2" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>College Name *</label>
+              <input type="text" [(ngModel)]="form.collegeName" name="collegeName" placeholder="XYZ University" />
+            </div>
+            <div class="form-group">
+              <label>Department *</label>
+              <input type="text" [(ngModel)]="form.department" name="department" placeholder="Business Administration" />
+            </div>
+          </div>
+
+          <div class="error-msg" *ngIf="error">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ error }}
+          </div>
+
+          <button type="submit" class="btn-register" [disabled]="loading">
+            <span *ngIf="!loading">Register & Get Credentials</span>
+            <span *ngIf="loading" class="spinner-sm"></span>
+          </button>
+        </form>
+
+        <div class="card-footer">
+          <p>Already registered? <a routerLink="/login">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

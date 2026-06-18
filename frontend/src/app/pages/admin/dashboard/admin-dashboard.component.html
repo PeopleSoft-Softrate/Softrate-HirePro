@@ -1,0 +1,99 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Welcome back, {{ auth.currentUser?.name }}</p>
+    </div>
+    <a routerLink="/admin/exams/create" class="btn-primary-action">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Create Exam
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" *ngIf="!loading">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ exams.length }}</div>
+        <div class="stat-label">Total Exams</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ activeExams }}</div>
+        <div class="stat-label">Active Exams</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ students.length }}</div>
+        <div class="stat-label">Students</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ totalSubmissions }}</div>
+        <div class="stat-label">Submissions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <!-- Recent Results Table -->
+  <div class="section" *ngIf="!loading">
+    <div class="section-head">
+      <h2>Recent Submissions</h2>
+      <a routerLink="/admin/results" class="view-all">View All →</a>
+    </div>
+
+    <div class="requests-table-wrapper" *ngIf="recentResults.length > 0">
+      <table class="requests-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>Exam</th>
+            <th>Score</th>
+            <th>Time Taken</th>
+            <th>Submitted At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of recentResults; let i = index">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td>
+              <div class="tbl-person">
+                <div class="tbl-avatar onboarding">{{ (r.studentId?.name || 'U')[0] }}</div>
+                <div>
+                  <div class="tbl-name">{{ r.studentId?.name }}</div>
+                  <div class="tbl-role">{{ r.studentId?.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="tbl-text">{{ r.examId?.title }}</td>
+            <td>
+              <span class="score-badge" [class]="getScoreClass(r)">
+                {{ r.totalScore }}/{{ r.totalMarks }} ({{ getPercent(r) }}%)
+              </span>
+            </td>
+            <td class="tbl-text">{{ formatTime(r.timeTakenSeconds) }}</td>
+            <td class="tbl-date">{{ r.submittedAt | date:'dd MMM, HH:mm' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="recentResults.length === 0">
+      <p>No submissions yet</p>
+    </div>
+  </div>
+</div>

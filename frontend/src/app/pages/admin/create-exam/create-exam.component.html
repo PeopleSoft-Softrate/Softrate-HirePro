@@ -1,0 +1,131 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <h1>{{ isEdit ? 'Edit Exam' : 'Create New Exam' }}</h1>
+      <p>{{ isEdit ? 'Modify exam structure and questions' : 'Build your assessment from scratch' }}</p>
+    </div>
+    <div class="exam-stats-mini" *ngIf="exam.sections.length > 0">
+      <span>{{ totalQuestions }} Q</span>
+      <span>·</span>
+      <span>{{ totalMarks }} Marks</span>
+      <span>·</span>
+      <span>{{ totalDuration }} min</span>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading"><div class="spinner"></div><p>Loading exam...</p></div>
+
+  <div class="builder" *ngIf="!loading">
+    <!-- Exam Info -->
+    <div class="section-card">
+      <div class="section-card-head">
+        <h3>Exam Details</h3>
+      </div>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Exam Title *</label>
+          <input type="text" [(ngModel)]="exam.title" placeholder="e.g. Business Development Executive Assessment" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Description (optional)</label>
+          <textarea [(ngModel)]="exam.description" placeholder="Brief description of this exam..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sections -->
+    <div class="section-card" *ngFor="let section of exam.sections; let sIdx = index">
+      <div class="section-card-head">
+        <div class="section-head-left">
+          <span class="section-num-badge">{{ sIdx + 1 }}</span>
+          <input type="text" [(ngModel)]="section.name" placeholder="Section name (e.g. Stage 1 – Business Aptitude)" class="section-title-input" />
+        </div>
+        <div class="section-head-right">
+          <div class="form-group inline">
+            <label>Duration (min)</label>
+            <input type="number" [(ngModel)]="section.duration" min="1" style="width:80px" />
+          </div>
+          <button class="btn-remove" (click)="removeSection(sIdx)" title="Remove section">✕</button>
+        </div>
+      </div>
+
+      <!-- Questions -->
+      <div class="questions-list">
+        <div class="question-builder-card" *ngFor="let q of section.questions; let qIdx = index">
+          <div class="qb-header">
+            <span class="qb-num">Q{{ qIdx + 1 }}</span>
+            <select [(ngModel)]="q.type" (change)="onTypeChange(sIdx, qIdx)" class="type-select">
+              <option value="mcq">MCQ</option>
+              <option value="written">Written</option>
+            </select>
+            <div class="qb-meta">
+              <label>Marks:</label>
+              <input type="number" [(ngModel)]="q.marks" min="1" style="width:60px" />
+              <label>Time (sec):</label>
+              <input type="number" [(ngModel)]="q.timeLimit" min="10" style="width:80px" />
+            </div>
+            <button class="btn-remove sm" (click)="removeQuestion(sIdx, qIdx)">✕</button>
+          </div>
+
+          <div class="form-group">
+            <label>Question *</label>
+            <textarea [(ngModel)]="q.text" placeholder="Enter the question text..." rows="3"></textarea>
+          </div>
+
+          <!-- MCQ Options -->
+          <div *ngIf="q.type === 'mcq'" class="options-builder">
+            <div class="option-row" *ngFor="let opt of q.options; let oIdx = index">
+              <span class="opt-letter">{{ ['A','B','C','D'][oIdx] }}</span>
+              <input type="text" [(ngModel)]="q.options[oIdx]" placeholder="Option {{ ['A','B','C','D'][oIdx] }}" />
+              <label class="correct-radio">
+                <input type="radio" [name]="'correct_' + sIdx + '_' + qIdx" [value]="q.options[oIdx]" [(ngModel)]="q.correctAnswer" />
+                <span>Correct</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Written Rubric -->
+          <div *ngIf="q.type === 'written'" class="rubric-builder">
+            <div class="rubric-head">
+              <span>Evaluation Rubric</span>
+              <button class="btn-add-rubric" (click)="addRubric(sIdx, qIdx)">+ Add Criterion</button>
+            </div>
+            <div class="rubric-row" *ngFor="let r of q.rubric; let rIdx = index">
+              <input type="text" [(ngModel)]="r.criterion" placeholder="Criterion name" style="flex:1" />
+              <input type="number" [(ngModel)]="r.marks" placeholder="Marks" min="0" style="width:80px" />
+              <button class="btn-remove sm" (click)="removeRubric(sIdx, qIdx, rIdx)">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-add-question" (click)="addQuestion(sIdx)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Question
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-add-section" (click)="addSection()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Section
+    </button>
+
+    <!-- Error -->
+    <div class="error-msg" *ngIf="error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      {{ error }}
+    </div>
+
+    <!-- Save Buttons -->
+    <div class="save-bar">
+      <button class="btn-save draft" (click)="save('draft')" [disabled]="saving">
+        Save as Draft
+      </button>
+      <button class="btn-save active" (click)="save('active')" [disabled]="saving">
+        {{ saving ? 'Saving...' : (isEdit ? 'Update & Activate' : 'Save & Activate') }}
+      </button>
+    </div>
+  </div>
+</div>

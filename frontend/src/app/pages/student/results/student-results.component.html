@@ -1,0 +1,55 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <h1>My Results</h1>
+    <p>Your assessment history</p>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div><p>Loading results...</p>
+  </div>
+
+  <div class="results-list" *ngIf="!loading">
+    <div class="result-card" *ngFor="let r of results">
+      <div class="result-top">
+        <div class="result-info">
+          <div class="result-title">{{ r.examId?.title }}</div>
+          <div class="result-date">Submitted {{ formatDate(r.submittedAt) }}</div>
+        </div>
+        <div class="result-score-block">
+          <span class="result-score" [class]="getScoreClass(r)">
+            {{ r.totalScore }}/{{ r.totalMarks }}
+          </span>
+          <span class="result-pct" [class]="getScoreClass(r)">{{ getPercent(r) }}%</span>
+        </div>
+        <button class="expand-btn" (click)="toggleExpand(r._id)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [style.transform]="expandedId === r._id ? 'rotate(180deg)' : ''" style="transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+
+      <div class="result-meta-row">
+        <span class="meta-badge time">⏱ {{ formatTime(r.timeTakenSeconds) }}</span>
+        <span class="meta-badge" [class]="getScoreClass(r)">
+          {{ getPercent(r) >= 70 ? '✓ Good' : getPercent(r) >= 40 ? '~ Average' : '✗ Low' }}
+        </span>
+      </div>
+
+      <!-- Section Breakdown -->
+      <div class="section-breakdown" *ngIf="expandedId === r._id">
+        <div class="section-row" *ngFor="let section of r.examId?.sections; let sIdx = index">
+          <div class="section-row-name">{{ section.name }}</div>
+          <div class="section-progress">
+            <div class="section-bar-bg">
+              <div class="section-bar-fill" [style.width.%]="getSectionTotal(r, sIdx) > 0 ? (getSectionScore(r, sIdx) / getSectionTotal(r, sIdx) * 100) : 0"></div>
+            </div>
+            <span class="section-score-text">{{ getSectionScore(r, sIdx) }}/{{ getSectionTotal(r, sIdx) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="results.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <p>No results yet. <a routerLink="/student/dashboard">Take an exam!</a></p>
+    </div>
+  </div>
+</div>
