@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ResultService } from '../../../services/result.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-student-results',
@@ -16,6 +17,7 @@ export class StudentResultsComponent implements OnInit {
   results: any[] = [];
   loading = true;
   expandedId: string | null = null;
+  showLogout = environment.showLogout;
   sidebarOpen = true;
 
   constructor(private resultService: ResultService, public auth: AuthService) {}

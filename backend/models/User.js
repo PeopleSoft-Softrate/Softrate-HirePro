@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  examId: { type: mongoose.Schema.Types.ObjectId, ref: 'Exam' },
   mobile: { type: String, trim: true },
-  collegeName: { type: String, trim: true },
+  collegeId: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
   department: { type: String, trim: true },
   graduationYear: { type: Number },
   password: { type: String, required: true },

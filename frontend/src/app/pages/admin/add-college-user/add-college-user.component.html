@@ -1,0 +1,132 @@
+<div class="page-wrap">
+  <div class="page-head">
+    <div class="head-left">
+      <button class="btn-back" (click)="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+      <div>
+        <h1>{{ phase === 1 ? 'Step 1: Select College' : 'Step 2: Add College User' }}</h1>
+        <p>{{ phase === 1 ? 'Select an existing college or add a new one.' : 'Create a new student user for ' + getSelectedCollegeName() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    
+    <!-- PHASE 1: College Selection/Creation -->
+    <div *ngIf="phase === 1">
+      <div class="toggle-mode">
+        <label>
+          <input type="radio" name="collegeMode" [value]="false" [(ngModel)]="isAddingNewCollege">
+          Select Existing College
+        </label>
+        <label>
+          <input type="radio" name="collegeMode" [value]="true" [(ngModel)]="isAddingNewCollege">
+          Add New College
+        </label>
+      </div>
+
+      <div *ngIf="!isAddingNewCollege" class="form-row" style="margin-top: 1.5rem;">
+        <div class="form-group">
+          <label for="collegeSelect">Select College *</label>
+          <select id="collegeSelect" [(ngModel)]="selectedCollegeId" class="custom-select">
+            <option value="" disabled>-- Select a College --</option>
+            <option *ngFor="let c of colleges" [value]="c._id">{{ c.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <form *ngIf="isAddingNewCollege" (ngSubmit)="onNextToStep2()" class="user-form" style="margin-top: 1.5rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cname">College Name *</label>
+            <input type="text" id="cname" name="cname" [(ngModel)]="newCollegeData.name" required />
+          </div>
+          <div class="form-group">
+            <label for="caffil">University Affiliation</label>
+            <input type="text" id="caffil" name="caffil" [(ngModel)]="newCollegeData.affiliation" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ccity">City</label>
+            <input type="text" id="ccity" name="ccity" [(ngModel)]="newCollegeData.city" />
+          </div>
+          <div class="form-group">
+            <label for="cstate">State</label>
+            <input type="text" id="cstate" name="cstate" [(ngModel)]="newCollegeData.state" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cperson">Contact Person Name</label>
+            <input type="text" id="cperson" name="cperson" [(ngModel)]="newCollegeData.contactPerson" />
+          </div>
+          <div class="form-group">
+            <label for="cemail">Contact Email</label>
+            <input type="email" id="cemail" name="cemail" [(ngModel)]="newCollegeData.contactEmail" />
+          </div>
+        </div>
+      </form>
+
+      <div class="form-actions" style="margin-top: 2rem;">
+        <button type="button" class="btn-primary-action" (click)="onNextToStep2()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-sm"></span>
+          <span *ngIf="!loading">Next Step</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PHASE 2: Student Details -->
+    <form *ngIf="phase === 2" (ngSubmit)="onSubmit()" class="user-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName">Full Name *</label>
+          <input type="text" id="fullName" name="fullName" [(ngModel)]="formData.fullName" required />
+        </div>
+        <div class="form-group">
+          <label for="rollNumber">Roll Number (Email ID) *</label>
+          <input type="email" id="rollNumber" name="rollNumber" [(ngModel)]="formData.rollNumber" placeholder="yovel4002@gmail.com" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password (DOB: ddmmyyyy) *</label>
+          <div class="input-with-icon">
+            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="formData.password" required />
+            <button type="button" class="toggle-pass" (click)="showPassword = !showPassword">
+              <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="mobile">Mobile Number *</label>
+          <input type="tel" id="mobile" name="mobile" [(ngModel)]="formData.mobile" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="gradYear">Graduation Year *</label>
+          <input type="number" id="gradYear" name="gradYear" [(ngModel)]="formData.gradYear" placeholder="2026" required />
+        </div>
+        <div class="form-group half-width">
+          <label for="department">Department *</label>
+          <input type="text" id="department" name="department" [(ngModel)]="formData.department" required />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary-action" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-sm"></span>
+          <span *ngIf="!loading">Add User</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

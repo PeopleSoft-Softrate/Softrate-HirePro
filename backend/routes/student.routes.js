@@ -8,7 +8,7 @@ const { generatePassword } = require('../utils/generatePassword');
 // POST /api/students/register  (public)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, mobile, collegeName, department, graduationYear } = req.body;
+    const { name, email, password, mobile, collegeId, department, graduationYear, examId } = req.body;
 
     if (!name || !email || !password)
       return res.status(400).json({ message: 'Name, email, and password are required' });
@@ -22,7 +22,8 @@ router.post('/register', async (req, res) => {
       email: email.toLowerCase(),
       password, // Password will be hashed by the User model's pre-save hook
       mobile,
-      collegeName,
+      collegeId,
+      examId,
       department,
       graduationYear,
       role: 'student'
@@ -43,6 +44,7 @@ router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
       .select('-password')
+      .populate('collegeId', 'name city')
       .sort({ createdAt: -1 });
     res.json(students);
   } catch (err) {

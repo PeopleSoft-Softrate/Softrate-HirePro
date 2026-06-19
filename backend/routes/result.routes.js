@@ -163,7 +163,11 @@ router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const filter = req.query.examId ? { examId: req.query.examId } : {};
     const results = await Result.find(filter)
-      .populate('studentId', 'name email collegeName department')
+      .populate({
+        path: 'studentId',
+        select: 'name email department collegeId',
+        populate: { path: 'collegeId', select: 'name' }
+      })
       .populate('examId', 'title totalMarks')
       .sort({ submittedAt: -1 });
     res.json(results);
@@ -176,7 +180,11 @@ router.get('/', protect, adminOnly, async (req, res) => {
 router.get('/:id', protect, adminOnly, async (req, res) => {
   try {
     const result = await Result.findById(req.params.id)
-      .populate('studentId', 'name email collegeName department')
+      .populate({
+        path: 'studentId',
+        select: 'name email department collegeId',
+        populate: { path: 'collegeId', select: 'name' }
+      })
       .populate('examId', 'title totalMarks sections');
     if (!result) return res.status(404).json({ message: 'Result not found' });
     res.json(result);

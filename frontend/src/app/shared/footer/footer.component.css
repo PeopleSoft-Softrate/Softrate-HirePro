@@ -1,0 +1,53 @@
+.app-footer {
+  border-top: 1px solid var(--outline-variant, #e5e7eb);
+  padding: 1.5rem 0;
+  width: 100%;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+  }
+}
+
+.footer-left {
+  color: var(--on-secondary-container, #6b7280);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-right a {
+  color: var(--on-secondary-container, #4b5563);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.footer-right a:hover {
+  color: var(--primary, #004ac6);
+}
+
+.footer-right .dot {
+  color: var(--outline-variant, #d1d5db);
+  font-size: 0.75rem;
+}

@@ -46,6 +46,7 @@
         <button class="btn-action toggle" (click)="toggleStatus(exam)">
           {{ exam.status === 'active' ? 'Deactivate' : 'Activate' }}
         </button>
+        <a [routerLink]="['/admin/exams', exam._id, 'add-user']" class="btn-action add-user">Add College User</a>
         <a [routerLink]="['/admin/results']" [queryParams]="{examId: exam._id}" class="btn-action results">Results</a>
         <button class="btn-action delete" (click)="deleteExam(exam._id)" [disabled]="deletingId === exam._id">Delete</button>
       </div>

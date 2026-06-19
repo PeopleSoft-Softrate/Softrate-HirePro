@@ -6,7 +6,13 @@ const { protect, adminOnly } = require('../middleware/auth');
 // GET /api/exams  — students see active, admin sees all
 router.get('/', protect, async (req, res) => {
   try {
-    const filter = req.user.role === 'admin' ? {} : { status: 'active' };
+    const filter = req.user.role === 'admin' ? {} : { status: 'active', _id: req.user.examId };
+    
+    // If student doesn't have an examId mapped, return empty array early
+    if (req.user.role === 'student' && !req.user.examId) {
+      return res.json([]);
+    }
+
     const exams = await Exam.find(filter)
       .select('title description status totalDuration totalMarks sections createdAt')
       .sort({ createdAt: -1 });
@@ -37,6 +43,10 @@ router.get('/:id', protect, async (req, res) => {
 
     // Students only get active exams and correctAnswer is removed
     if (req.user.role === 'student') {
+      if (req.user.examId && req.user.examId.toString() !== exam._id.toString()) {
+        return res.status(403).json({ message: 'You are not authorized to access this exam.' });
+      }
+
       if (exam.status !== 'active')
         return res.status(403).json({ message: 'Exam is not available' });
       // Strip correct answers for students

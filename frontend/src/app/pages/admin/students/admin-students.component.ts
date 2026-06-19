@@ -22,7 +22,7 @@ import { StudentService } from '../../../services/student.service';
               <td><div class="tbl-person"><div class="tbl-avatar onboarding">{{ (s.name || 'U')[0] }}</div><div class="tbl-name">{{ s.name }}</div></div></td>
               <td class="tbl-text">{{ s.email }}</td>
               <td class="tbl-text">{{ s.mobile || '-' }}</td>
-              <td class="tbl-text">{{ s.collegeName || '-' }}</td>
+              <td class="tbl-text">{{ s.collegeId?.name || '-' }}</td>
               <td class="tbl-text">{{ s.department || '-' }}</td>
               <td class="tbl-text">{{ s.graduationYear || '-' }}</td>
               <td class="tbl-date">{{ s.createdAt | date:'dd MMM yyyy' }}</td>

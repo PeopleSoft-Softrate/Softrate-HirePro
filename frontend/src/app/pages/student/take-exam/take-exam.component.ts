@@ -51,6 +51,7 @@ export class TakeExamComponent implements OnInit, OnDestroy {
   private cutHandler!: (e: Event) => void;
   private contextMenuHandler!: (e: Event) => void;
   private fullscreenChangeHandler!: () => void;
+  private domObserver!: MutationObserver;
   private isFullscreen = false;
 
   // Current navigation
@@ -100,6 +101,12 @@ export class TakeExamComponent implements OnInit, OnDestroy {
         this.setSectionTimer();
         this.loading = false;
         this.examReady = true;
+
+        // If the browser is already in fullscreen (i.e. from the Dashboard Gate modal click),
+        // we can safely bypass the internal gate and start the exam immediately.
+        if (document.fullscreenElement) {
+          this.startExam();
+        }
       },
       error: () => { this.error = 'Failed to load exam.'; this.loading = false; }
     });
@@ -132,10 +139,50 @@ export class TakeExamComponent implements OnInit, OnDestroy {
     };
     document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
     document.addEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
+
+    // Extension Injection Detection
+    this.domObserver = new MutationObserver((mutations) => {
+      if (!this.examStarted || this.submitted) return;
+      
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as HTMLElement;
+              const tag = el.tagName.toLowerCase();
+              const id = el.id ? el.id.toLowerCase() : '';
+              
+              // Detect common grammar and AI assistant extensions
+              if (
+                tag.includes('grammarly') || 
+                id.includes('grammarly') ||
+                tag.includes('languagetool') ||
+                tag.includes('monica') ||
+                tag.includes('chatgpt') ||
+                tag.includes('copilot') ||
+                tag.includes('deepl') ||
+                tag.includes('compose-ai') ||
+                id.includes('monica-content') ||
+                id.includes('chatgpt-wrapper')
+              ) {
+                // Remove the injected element immediately
+                el.remove();
+                this.handleViolation('Unauthorized browser extension detected!');
+              }
+            }
+          });
+        }
+      }
+    });
+
+    this.domObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   ngOnDestroy() {
     this.clearTimers();
+    if (this.domObserver) {
+      this.domObserver.disconnect();
+    }
     document.removeEventListener('copy', this.copyHandler);
     document.removeEventListener('cut', this.cutHandler);
     document.removeEventListener('paste', this.copyHandler);

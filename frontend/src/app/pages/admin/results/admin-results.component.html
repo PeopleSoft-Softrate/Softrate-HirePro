@@ -1,18 +1,49 @@
 <div class="page-wrap">
   <div class="page-head">
-    <div>
-      <h1>Results Database</h1>
-      <p>All student submissions</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div>
+        <h1>Results Database</h1>
+        <p>All student submissions</p>
+      </div>
+      <button (click)="exportCSV()" *ngIf="!loading && filteredResults.length > 0" style="display: flex; align-items: center; gap: 0.5rem; background: var(--accent-primary); color: white; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: opacity 0.2s;">
+        <span class="material-symbols-outlined" style="font-size: 18px;">download</span> Export CSV
+      </button>
     </div>
   </div>
 
-  <!-- Filter -->
+  <!-- Filters -->
   <div class="filter-bar" *ngIf="!loading">
-    <label>Filter by Exam:</label>
-    <select (change)="filterByExam($any($event.target).value)">
-      <option value="">All Exams</option>
-      <option *ngFor="let e of exams" [value]="e._id">{{ e.title }}</option>
-    </select>
+    <div class="filter-group">
+      <label>Exam:</label>
+      <select [(ngModel)]="filters.examId" (change)="applyFilters()">
+        <option value="">All Exams</option>
+        <option *ngFor="let e of exams" [value]="e._id">{{ e.title }}</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>College:</label>
+      <select [(ngModel)]="filters.college" (change)="applyFilters()">
+        <option value="">All Colleges</option>
+        <option *ngFor="let c of colleges" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Max Warnings:</label>
+      <input type="number" min="0" placeholder="e.g. 0" [(ngModel)]="filters.maxWarnings" (input)="applyFilters()" />
+    </div>
+
+    <div class="filter-group">
+      <label>Min Marks:</label>
+      <input type="number" min="0" placeholder="e.g. 40" [(ngModel)]="filters.minMarks" (input)="applyFilters()" />
+    </div>
+
+    <div class="filter-group">
+      <label>Top N Students:</label>
+      <input type="number" min="1" placeholder="e.g. 10" [(ngModel)]="filters.topN" (input)="applyFilters()" />
+    </div>
+
     <span class="result-count">{{ filteredResults.length }} result(s)</span>
   </div>
 
@@ -46,7 +77,7 @@
             </div>
           </td>
           <td>
-            <div class="tbl-detail-primary">{{ r.studentId?.collegeName || '-' }}</div>
+            <div class="tbl-detail-primary">{{ r.studentId?.collegeId?.name || '-' }}</div>
             <div class="tbl-detail-secondary">{{ r.studentId?.department }}</div>
           </td>
           <td>

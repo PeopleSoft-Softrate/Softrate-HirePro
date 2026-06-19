@@ -2,7 +2,11 @@ import { Routes } from '@angular/router';
 import { authGuard, adminGuard, studentGuard, guestGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent),
+    canActivate: [guestGuard]
+  },
 
   // Public routes (redirect if logged in)
   {
@@ -47,6 +51,10 @@ export const routes: Routes = [
       {
         path: 'exams/:id/edit',
         loadComponent: () => import('./pages/admin/create-exam/create-exam.component').then(m => m.CreateExamComponent)
+      },
+      {
+        path: 'exams/:id/add-user',
+        loadComponent: () => import('./pages/admin/add-college-user/add-college-user.component').then(m => m.AddCollegeUserComponent)
       },
       {
         path: 'results',

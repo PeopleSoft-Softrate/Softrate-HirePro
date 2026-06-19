@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ExamService } from '../../../services/exam.service';
 import { ResultService } from '../../../services/result.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
+import { FooterComponent } from '../../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FooterComponent],
   templateUrl: './student-dashboard.component.html',
   styleUrls: ['./student-dashboard.component.css']
 })
@@ -17,6 +19,8 @@ export class StudentDashboardComponent implements OnInit {
   myResults: any[] = [];
   loading = true;
   sidebarOpen = true;
+  showLogout = environment.showLogout;
+  showGate = false;
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
@@ -54,6 +58,7 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   constructor(
+    private router: Router,
     private examService: ExamService,
     private resultService: ResultService,
     public auth: AuthService
@@ -102,5 +107,26 @@ export class StudentDashboardComponent implements OnInit {
 
   logout() {
     this.auth.logout();
+  }
+
+  openGate() {
+    this.showGate = true;
+  }
+
+  closeGate() {
+    this.showGate = false;
+  }
+
+  startExamFromDashboard() {
+    const examId = this.pendingExams[0]._id;
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if ((el as any).webkitRequestFullscreen) {
+      (el as any).webkitRequestFullscreen();
+    }
+    
+    this.showGate = false;
+    this.router.navigate(['/student/exam', examId]);
   }
 }

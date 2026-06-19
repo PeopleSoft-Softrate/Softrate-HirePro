@@ -85,7 +85,7 @@
 }
 .status-chip.active {
   background: var(--success-color);
-  color: var(--success-color);
+  color: #ffffff;
 }
 .exam-date {
   font-size: var(--text-md);
@@ -164,6 +164,13 @@
 }
 .btn-action.delete:hover {
   background: var(--hc-danger-bg);
+}
+.btn-action.add-user {
+  background: #d1fae5;
+  color: #059669;
+}
+.btn-action.add-user:hover {
+  background: #a7f3d0;
 }
 .btn-action:disabled {
   opacity: 0.6;
